@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Create the base map -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quadrant Map</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        #info-box {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 200px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border: 1px solid #ccc;
+            z-index: 1000;
+        }
+        #fileInput {
+            margin: 10px 0;
+        }
+    </style>
+    <!-- Import Leaflet CSS and JavaScript -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+    <!-- Import PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <!-- Import Awesome markers to change the colours depending on the quadrant -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+
+</head>
+</head>
+<body>
+    <div id="map">
+</div>
+    <!-- Create the info box that displays at the top right -->
+    <div id="info-box">
+        <p>Note that the cutoff point for the four areas is latitude 51.053 and longitude -114.0625. This is approximately the middle of the Centre St Bridge.<p>
+        <input type="file" id="fileInput" accept=".csv, .txt" />
+        <div id="parsedData"></div>
+	<div id="sums">
+            <p>Orange Sum: <span id="sumOrange">0</span></p>
+            <p>Blue Sum: <span id="sumBlue">0</span></p>
+            <p>Red Sum: <span id="sumRed">0</span></p>
+            <p>Purple Sum: <span id="sumPurple">0</span></p>
+    </div>
+
+    <!-- Create the map and centre it on Calgary -->
+    <script>
+        var map = L.map('map').setView([51.053, -114.0625], 11);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+
+    <!-- Create the quadrants -->
+	var quadrants = [
+            {
+                coordinates: [[51.053, -114.0625], [51.192, -114.0625], [51.192, -114.3], [51.053, -114.3]],
+                color: 'blue',
+		sum: 'sumBlue',
+		polygon: null
+            },
+            {
+                coordinates: [[51.053, -114.0625], [51.192, -114.0625], [51.192, -113.86], [51.053, -113.86]],
+                color: 'orange',
+		sum: 'sumOrange',
+		polygon: null
+            },
+            {
+                coordinates: [[51.053, -114.0625], [50.85, -114.0625], [50.85, -113.86], [51.053, -113.86]],
+                color: 'red',
+		sum: 'sumRed',
+		polygon: null
+            },
+            {
+                coordinates: [[51.053, -114.0625], [50.85, -114.0625], [50.85, -114.3], [51.053, -114.3]],
+                color: 'purple',
+		sum: 'sumPurple',
+		polygon: null
+            }
+        ];
+
+    <!-- Define the sums for each of the quadrants -->
+	var sumValues = {
+            sumOrange: 0,
+            sumBlue: 0,
+            sumRed: 0,
+            sumPurple: 0
+        };
+
+    <!-- Display the quadrants and colour them -->
+        quadrants.forEach(function(quadrant) {
+            var polygon = L.polygon(quadrant.coordinates, {
+                color: quadrant.color,
+                fillColor: quadrant.color,
+                fillOpacity: 0.2,
+                weight: 0.1,
+            })
+	    polygon.addTo(map);
+	    polygon.bindTooltip(
+        `Quadrant Sum: 0`,
+        {"sticky": true}
+    );
+    quadrant.polygon = polygon;
+        });
+
+    <!-- Parse the csv or txt -->
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            var file = event.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    dynamicTyping: true,
+                    complete: function(results) {
+                        displayData(results.data);
+                    }
+                });
+            }
+        });
+
+    <!-- Clear the map and then display each of the markers from the file -->
+        function displayData(data) {
+
+            map.eachLayer(function(layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+	
+                        data.forEach(function(row) {
+                if (row.latitude && row.longitude) {
+                    var marker = L.marker([row.latitude, row.longitude]);
+
+		    <!-- Colour the markers depending on the quadrant -->
+                    if (row.latitude > 51.053 && row.longitude > -114.0625){
+			var icon = L.AwesomeMarkers.icon({"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "orange", "prefix": "glyphicon"});
+                    	marker.setIcon(icon);
+			sumValues.sumOrange += row.value}
+
+		    if (row.latitude > 51.053 && row.longitude <= -114.0625){
+			var icon = L.AwesomeMarkers.icon({"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"});
+                    	marker.setIcon(icon);
+			sumValues.sumBlue += row.value}
+
+		    if (row.latitude <= 51.053 && row.longitude > -114.0625){
+			var icon = L.AwesomeMarkers.icon({"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"});
+                    	marker.setIcon(icon);
+			sumValues.sumRed += row.value}
+
+		    if (row.latitude <= 51.053 && row.longitude <= -114.0625){
+			var icon = L.AwesomeMarkers.icon({"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "purple", "prefix": "glyphicon"});
+                    	marker.setIcon(icon);
+			sumValues.sumPurple += row.value}
+
+		    <!-- Display the value if the marker is clicked -->
+                    marker.bindPopup(`<b>${row.name || row.value}</b>`);
+
+                    marker.addTo(map);
+                }
+            });
+
+
+    	    <!-- Update the sums in the info box -->
+	    document.getElementById('sumOrange').textContent = sumValues.sumOrange;
+            document.getElementById('sumBlue').textContent = sumValues.sumBlue;
+            document.getElementById('sumRed').textContent = sumValues.sumRed;
+            document.getElementById('sumPurple').textContent = sumValues.sumPurple;
+
+    	    <!-- Update the sum when the cursor hovers over a quadrant -->
+	    quadrants.forEach(function(quadrant) {
+        var tooltipContent = sumValues[quadrant.sum];
+        quadrant.polygon.setTooltipContent(`Quadrant Sum: ${tooltipContent}`);
+    });
+}
+    </script>
+</body>
+</html>
