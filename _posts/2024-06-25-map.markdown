@@ -4,7 +4,7 @@ title:  "Map!"
 date:   2024-06-25 09:43:31 -0600
 categories: jekyll update
 ---
-Below should be a map.
-<iframe src="_posts/QuadrantMap.html" width="100%" height="500"></iframe>
+Below should be a map. Test
+<iframe src="assets/maps/QuadrantMap.html" width="100%" height="500"></iframe>
 
 
