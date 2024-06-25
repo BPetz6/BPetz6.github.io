@@ -4,6 +4,6 @@ title:  "Map!"
 date:   2024-06-25 09:43:31 -0600
 categories: jekyll update
 ---
-<iframe src="/BPetz6.github.io/QuadrantMap.html" width="100%" height="500"></iframe>
+<iframe src="QuadrantMap.html" width="100%" height="500"></iframe>
 
 
