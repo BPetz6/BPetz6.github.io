@@ -82,8 +82,15 @@ folium.Polygon(
 ).add_to(m)
 
 # Save the map
-m.save("/Path/where/you/want/to/save/your/map")
+m.save("/Path/where/you/want/to/save/your/map.html")
 {% endhighlight %}
+
+Next, I opened the map in a text editor to edit the html. If you are following along with me, your code will likely look different from the code on my Github. This is expected, so don't worry.
+
+ I first imported PapaParse so I could parse .csv and .txt files. To import it, I added the following to the lines that start with " <script src":
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+I then created the info box that displays at the top right corner of the window.
 
 
 
