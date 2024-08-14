@@ -19,12 +19,6 @@ df = pd.read_csv(csv_file_path)
 data = df
 
 models_dir = os.path.join(os.getenv('SLURM_TMPDIR'), 'models')
-#
-# path = "/Users/braedonpetz/Downloads/jp_female_mr1.csv"
-# df = pd.read_csv(path)
-# data = df
-# models_dir = "/Users/braedonpetz/Downloads"
-
 
 def configure_gpu():
     gpus = tf.config.experimental.list_physical_devices('GPU')
