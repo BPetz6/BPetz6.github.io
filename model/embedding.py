@@ -22,11 +22,6 @@ distance_matrix = np.load(distance_file_path)
 
 models_dir = os.path.join(os.getenv('SLURM_TMPDIR'), 'models')
 
-# path = "/Users/braedonpetz/Downloads/jp_female_mr1.csv"
-# df = pd.read_csv(path)
-# data = df
-# models_dir = "/Users/braedonpetz/Downloads"
-# distance_matrix = np.load('/Users/braedonpetz/Cedar/data/distance_matrix.npy')
 
     
 def configure_gpu():
